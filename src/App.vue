@@ -10,6 +10,7 @@ import { computed, ref } from 'vue'
 const word = ref('василий')
 const letters = ref<string[]>([])
 const correctLetters = computed(() => letters.value.filter(letter => word.value.includes(letter)))
+const wrongLetters = computed(() => letters.value.filter(letter => !word.value.includes(letter)))
 const notification = ref<InstanceType<typeof GameNotification> | null>(null)
 
 window.addEventListener('keydown', ({ key }) => {
@@ -30,7 +31,7 @@ window.addEventListener('keydown', ({ key }) => {
 
     <div class="game-container">
         <GameFigure />
-        <GameWrongLetters />
+        <GameWrongLetters :wrong-letters="wrongLetters" />
         <GameWord :word="word" :correct-letters="correctLetters" />
     </div>
 
