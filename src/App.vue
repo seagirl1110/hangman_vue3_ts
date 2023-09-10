@@ -12,22 +12,28 @@ const word = ref('василий')
 const letters = ref<string[]>([])
 const correctLetters = computed(() => letters.value.filter(letter => word.value.includes(letter)))
 const wrongLetters = computed(() => letters.value.filter(letter => !word.value.includes(letter)))
+const isLose = computed(() => wrongLetters.value.length === 6)
+const isWin = computed(() => [...word.value].every(x => correctLetters.value.includes(x)))
 const notification = ref<InstanceType<typeof GameNotification> | null>(null)
 const popup = ref<InstanceType<typeof GamePopup> | null>(null)
 
 watch(wrongLetters, () => {
-    if (wrongLetters.value.length === 6) {
+    if (isLose.value) {
         popup.value?.open('lose')
     }
 })
 
 watch(correctLetters, () => {
-    if ([...word.value].every(x => correctLetters.value.includes(x))) {
+    if (isWin.value) {
         popup.value?.open('win')
     }
 })
 
 window.addEventListener('keydown', ({ key }) => {
+    if (isLose.value || isWin.value) {
+        return
+    }
+
     if (letters.value.includes(key)) {
         notification.value?.open()
         setTimeout(() => notification.value?.close(), 2000);
@@ -55,6 +61,6 @@ const restart = () => {
         <GameWord :word="word" :correct-letters="correctLetters" />
     </div>
 
-    <GamePopup ref="popup" :word="word" @restart="restart"/>
-    <GameNotification ref="notification"  />
+    <GamePopup ref="popup" :word="word" @restart="restart" />
+    <GameNotification ref="notification" />
 </template>
