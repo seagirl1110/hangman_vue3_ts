@@ -6,12 +6,26 @@ import GameWord from './components/GameWord.vue'
 import GamePopup from './components/GamePopup.vue'
 import GameNotification from './components/GameNotification.vue'
 import { computed, ref } from 'vue'
+import { watch } from 'vue'
 
 const word = ref('василий')
 const letters = ref<string[]>([])
 const correctLetters = computed(() => letters.value.filter(letter => word.value.includes(letter)))
 const wrongLetters = computed(() => letters.value.filter(letter => !word.value.includes(letter)))
 const notification = ref<InstanceType<typeof GameNotification> | null>(null)
+const popup = ref<InstanceType<typeof GamePopup> | null>(null)
+
+watch(wrongLetters, () => {
+    if (wrongLetters.value.length === 6) {
+        popup.value?.open('lose')
+    }
+})
+
+watch(correctLetters, () => {
+    if ([...word.value].every(x => correctLetters.value.includes(x))) {
+        popup.value?.open('win')
+    }
+})
 
 window.addEventListener('keydown', ({ key }) => {
     if (letters.value.includes(key)) {
@@ -24,6 +38,12 @@ window.addEventListener('keydown', ({ key }) => {
         letters.value.push(key.toLowerCase())
     }
 })
+
+const restart = () => {
+    letters.value = []
+    popup.value?.close()
+
+}
 </script>
 
 <template>
@@ -35,6 +55,6 @@ window.addEventListener('keydown', ({ key }) => {
         <GameWord :word="word" :correct-letters="correctLetters" />
     </div>
 
-    <GamePopup v-if="false" />
-    <GameNotification ref="notification" />
+    <GamePopup ref="popup" :word="word" @restart="restart"/>
+    <GameNotification ref="notification"  />
 </template>
