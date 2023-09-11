@@ -6,16 +6,13 @@ import GameWord from './components/GameWord.vue'
 import GamePopup from './components/GamePopup.vue'
 import GameNotification from './components/GameNotification.vue'
 import { useRandomWord } from './composables/useRandomWord'
-import { computed, ref } from 'vue'
+import { useLetters } from './composables/useLetters'
+import { ref } from 'vue'
 import { watch } from 'vue'
 
 const { word, getRandomWord } = useRandomWord()
+const { letters, correctLetters, wrongLetters, isLose, isWin, addLetter, resetLetters } = useLetters(word)
 
-const letters = ref<string[]>([])
-const correctLetters = computed(() => letters.value.filter(letter => word.value.includes(letter)))
-const wrongLetters = computed(() => letters.value.filter(letter => !word.value.includes(letter)))
-const isLose = computed(() => wrongLetters.value.length === 6)
-const isWin = computed(() => [...word.value].every(x => correctLetters.value.includes(x)))
 const notification = ref<InstanceType<typeof GameNotification> | null>(null)
 const popup = ref<InstanceType<typeof GamePopup> | null>(null)
 
@@ -42,14 +39,12 @@ window.addEventListener('keydown', ({ key }) => {
         return
     }
 
-    if (/[а-яА-ЯёЁ]/.test(key)) {
-        letters.value.push(key.toLowerCase())
-    }
+    addLetter(key)
 })
 
 const restart = async () => {
     await getRandomWord()
-    letters.value = []
+    resetLetters()
     popup.value?.close()
 }
 </script>
