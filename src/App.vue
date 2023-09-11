@@ -5,22 +5,11 @@ import GameWrongLetters from './components/GameWrongLetters.vue'
 import GameWord from './components/GameWord.vue'
 import GamePopup from './components/GamePopup.vue'
 import GameNotification from './components/GameNotification.vue'
+import { useRandomWord } from './composables/useRandomWord'
 import { computed, ref } from 'vue'
 import { watch } from 'vue'
-import axios from 'axios'
 
-const word = ref('')
-const getRandomWord = async () => {
-    try {
-        const { data } = await axios<{ FirstName: string }>('https://api.randomdatatools.ru/?unescaped=false&params=FirstName')
-        word.value = data.FirstName.toLowerCase()
-    } catch (err) {
-        console.log(err)
-        word.value = ''
-    }
-}
-
-getRandomWord()
+const { word, getRandomWord } = useRandomWord()
 
 const letters = ref<string[]>([])
 const correctLetters = computed(() => letters.value.filter(letter => word.value.includes(letter)))
@@ -58,11 +47,10 @@ window.addEventListener('keydown', ({ key }) => {
     }
 })
 
-const restart = () => {
-    getRandomWord()
+const restart = async () => {
+    await getRandomWord()
     letters.value = []
     popup.value?.close()
-
 }
 </script>
 
